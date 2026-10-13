@@ -25,6 +25,9 @@
       "path": "packages/tools/ai-docgen"
     },
     {
+      "path": "packages/tools/api-diff"
+    },
+    {
       "path": "packages/tools/utils"
     },
     {

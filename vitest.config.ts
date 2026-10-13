@@ -80,6 +80,7 @@ export default defineConfig({
     projects: [
       ...project("@yielded/jose", "packages/jose"),
       // Tooling uses Node compiler APIs and native bundlers; JOSE runs on every runtime.
+      ...project("@effect/api-diff", "packages/tools/api-diff", isNode),
       ...project("@effect/bundle", "packages/tools/bundle", isNode, {}, [
         ...exclude.filter((pattern) => pattern !== "**/bundle/**"),
         // This upstream regression test requires Effect's own source checkout.

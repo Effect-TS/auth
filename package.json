@@ -27,6 +27,7 @@
     "lint-fix": "oxlint --fix && dprint fmt",
     "ai-docgen": "effect-ai-docgen ai-docs/src -o LLMS.md",
     "ai-docgen:watch": "pnpm ai-docgen --watch",
+    "api-diff": "pnpm --dir packages/tools/api-diff exec node src/bin.ts",
     "test-types": "tstyche --target '>=5.9'",
     "changeset-publish": "node scripts/set-strip-internal.mjs && pnpm codemod && pnpm build && changeset publish --tag staging",
     "docs": "pnpm --filter @yielded/jose exec docgen",
