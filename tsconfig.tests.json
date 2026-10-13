@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "references": [{ "path": "tsconfig.packages.json" }],
+  "include": [
+    "**/vitest.*.ts", // All vitest config files across all packages
+    "./bundle/**/*.ts", // Bundle size test files
+    "./packages/*/test/**/*.ts",
+    "./packages/*/test/**/*.json",
+    "./packages/*/typetest/**/*.ts",
+    "./packages/*/benchmark/**/*.ts",
+    "./packages/**/test/**/*.ts",
+    "./packages/**/test/**/*.json",
+    "./packages/**/typetest/**/*.ts",
+    "./packages/**/benchmark/**/*.ts"
+  ],
+  "exclude": ["**/node_modules/**", "**/dist/**", "./packages/tools/bundle/test/HttpRouterEsbuild.test.ts"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "erasableSyntaxOnly": false,
+    "resolveJsonModule": true,
+    "types": ["node"],
+    "plugins": [{
+      "name": "@effect/language-service",
+      "namespaceImportPackages": [],
+      "includeSuggestionsInTsc": false,
+      "ignoreEffectWarningsInTscExitCode": true,
+      "ignoreEffectErrorsInTscExitCode": true,
+      "overrides": [
+        {
+          "include": ["**/typetest/**/*.ts"],
+          "options": {
+            "diagnosticSeverity": {
+              "floatingEffect": "off"
+            }
+          }
+        }
+      ],
+      "diagnosticSeverity": {
+        "unknownInEffectCatch": "off",
+        "multipleEffectProvide": "off",
+        "unstableApiUsage": "off"
+      }
+    }]
+  }
+}

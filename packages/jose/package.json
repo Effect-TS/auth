@@ -1,0 +1,64 @@
+{
+  "name": "@yielded/jose",
+  "version": "0.1.0-beta.38",
+  "description": "Schema-typed Effect JOSE with explicit keys, cryptography, and remote JWKS trust.",
+  "homepage": "https://yielded.dev/auth/",
+  "bugs": {
+    "url": "https://github.com/Effect-TS/auth/issues"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Effect-TS/auth.git",
+    "directory": "packages/jose"
+  },
+  "files": [
+    "src/**/*.ts",
+    "dist/**/*.js",
+    "dist/**/*.js.map",
+    "dist/**/*.d.ts",
+    "dist/**/*.d.ts.map",
+    "THIRD_PARTY_NOTICES.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "ai-docs/**/*"
+  ],
+  "type": "module",
+  "sideEffects": [],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": "./src/index.ts",
+    "./Errors": "./src/Errors.ts",
+    "./Jwk": "./src/Jwk.ts",
+    "./Jwks": "./src/Jwks.ts",
+    "./Jws": "./src/Jws.ts",
+    "./Jwt": "./src/Jwt.ts",
+    "./Jwe": "./src/Jwe.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true,
+    "exports": {
+      "./package.json": "./package.json",
+      ".": "./dist/index.js",
+      "./Errors": "./dist/Errors.js",
+      "./Jwk": "./dist/Jwk.js",
+      "./Jwks": "./dist/Jwks.js",
+      "./Jws": "./dist/Jws.js",
+      "./Jwt": "./dist/Jwt.js",
+      "./Jwe": "./dist/Jwe.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -b tsconfig.json && pnpm babel",
+    "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
+    "check": "tsc -b tsconfig.json",
+    "codegen": "effect-utils codegen"
+  },
+  "devDependencies": {
+    "effect": "4.0.3"
+  },
+  "peerDependencies": {
+    "effect": "^4.0.3"
+  }
+}
