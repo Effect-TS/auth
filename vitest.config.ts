@@ -79,19 +79,18 @@ export default defineConfig({
     passWithNoTests: true,
     projects: [
       ...project("@yielded/jose", "packages/jose"),
-      // Tooling uses Node compiler APIs and native bundlers; JOSE runs on every runtime.
-      ...project("@effect/api-diff", "packages/tools/api-diff", isNode),
-      ...project("@effect/bundle", "packages/tools/bundle", isNode, {}, [
+      ...project("@effect/api-diff", "packages/tools/api-diff"),
+      ...project("@effect/bundle", "packages/tools/bundle", true, {}, [
         ...exclude.filter((pattern) => pattern !== "**/bundle/**"),
         // This upstream regression test requires Effect's own source checkout.
         "test/HttpRouterEsbuild.test.ts"
       ]),
-      ...project("@effect/doctest", "packages/tools/doctest", isNode),
-      ...project("@effect/docgen", "packages/tools/docgen", isNode),
-      ...project("@effect/jsdocs", "packages/tools/jsdocs", isNode),
-      ...project("@effect/npm-promote", "packages/tools/npm-promote", isNode),
+      ...project("@effect/doctest", "packages/tools/doctest"),
+      ...project("@effect/docgen", "packages/tools/docgen"),
+      ...project("@effect/jsdocs", "packages/tools/jsdocs"),
+      ...project("@effect/npm-promote", "packages/tools/npm-promote"),
       ...project("@effect/utils", "packages/tools/utils", isNode),
-      ...project("@effect/oxc", "packages/tools/oxc", isNode)
+      ...project("@effect/oxc", "packages/tools/oxc")
     ]
   }
 })

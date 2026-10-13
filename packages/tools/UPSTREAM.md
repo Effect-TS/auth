@@ -23,8 +23,8 @@ bundle report; the root bundle scripts build first.
 
 The upstream `HttpRouterEsbuild.test.ts` is retained but excluded from local
 execution and checking: it tests tree shaking of the absent Effect source
-checkout. All other vendored test suites run in the Node project configuration.
-JOSE tests run on Node, Bun, and Deno.
+checkout. JOSE and the other vendored test suites run on Node, Bun, and Deno,
+except `@effect/utils`, which uses upstream's Node-only project selection.
 
 The root scripts and configuration follow the same commit with package inventory
 and published-dependency substitutions. The bundle wrappers additionally report

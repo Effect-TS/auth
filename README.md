@@ -37,8 +37,8 @@ check reports current sizes without a comparison.
 CI uses Effect's pinned actions, Node 26.4.0, Bun 1.4.0, Deno 2.9.4, Namespace
 runner profiles, and separate static, types, build, bundle, runtime, and doctest
 jobs. Run `bun run --bun vitest run`, `deno task test --run`, and `deno check .`
-to exercise the additional runtimes locally. The vendored tooling tests run on
-Node; JOSE tests run on all three runtimes.
+to exercise the additional runtimes locally. JOSE and the vendored tooling tests
+use the same runtime selection as Effect; only `@effect/utils` requires Node.
 
 Release, snapshot, release queue, bundle comment, and npm promotion workflows
 follow the same upstream revision. Changes are limited to this repository's
