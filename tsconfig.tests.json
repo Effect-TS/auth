@@ -18,6 +18,9 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": true,
+    // Tests execute source imports across package boundaries without emitting JavaScript.
+    "rewriteRelativeImportExtensions": false,
+    "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": false,
     "resolveJsonModule": true,
     "types": ["node"],

@@ -19,7 +19,7 @@ lib/
 coverage/
 tmp/
 stats.txt
-packages/jose/docs/
+packages/*/docs/
 
 # Generated package documentation
 /packages/**/AGENTS.md

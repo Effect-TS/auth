@@ -30,7 +30,7 @@
     "api-diff": "pnpm --dir packages/tools/api-diff exec node src/bin.ts",
     "test-types": "tstyche --target '>=5.9'",
     "changeset-publish": "node scripts/set-strip-internal.mjs && pnpm codemod && pnpm build && changeset publish --tag staging",
-    "docs": "pnpm --filter @yielded/jose exec docgen",
+    "docs": "pnpm --recursive --filter \"@yielded/*\" run docs",
     "changeset": "changeset",
     "changeset-version": "changeset version"
   },
@@ -54,7 +54,9 @@
     "@types/jscodeshift": "^17.3.0",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.3",
+    "@yielded/crypto": "workspace:^",
     "@yielded/jose": "workspace:^",
+    "@yielded/oauth": "workspace:^",
     "ast-types": "^0.16.3",
     "babel-plugin-annotate-pure-calls": "^0.5.0",
     "dprint": "^0.61.1",

@@ -7,7 +7,9 @@
     "net"
   ],
   "workspace": [
-    "./packages/jose"
+    "./packages/jose",
+    "./packages/crypto",
+    "./packages/oauth"
   ],
   "exclude": [
     "**/*.mjs",

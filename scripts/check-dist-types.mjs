@@ -1,4 +1,4 @@
-// Type-checks the built `@yielded/jose` declarations the way a consumer with
+// Type-checks all public packages' built declarations the way a consumer with
 // `skipLibCheck: false` does. Run after `pnpm build` with `stripInternal`
 // enabled to catch public declarations that reference `@internal` symbols
 // (see Effect-TS/effect#6431, #7187, #8161).
@@ -9,20 +9,24 @@ import * as Path from "node:path"
 import { fileURLToPath } from "node:url"
 
 const root = Path.resolve(Path.dirname(fileURLToPath(import.meta.url)), "..")
-const pkgDir = Path.join(root, "packages", "jose")
-const dist = Path.join(pkgDir, "dist")
-
-if (!Fs.existsSync(Path.join(dist, "index.d.ts"))) {
-  console.error("packages/jose/dist is missing; run `pnpm build` first")
-  process.exit(1)
+const paths = {}
+for (const entry of Fs.readdirSync(Path.join(root, "packages"), { withFileTypes: true })) {
+  const pkgDir = Path.join(root, "packages", entry.name)
+  const manifest = Path.join(pkgDir, "package.json")
+  if (!entry.isDirectory() || !Fs.existsSync(manifest)) continue
+  const pkg = JSON.parse(Fs.readFileSync(manifest, "utf8"))
+  if (pkg.private) continue
+  for (const [key, target] of Object.entries(pkg.publishConfig.exports)) {
+    if (target === null || key === "./package.json" || key.includes("*")) continue
+    const declaration = Path.resolve(pkgDir, target.replace(/\.js$/, ".d.ts"))
+    if (!Fs.existsSync(declaration)) {
+      throw new Error(`${declaration} is missing; run \`pnpm build\` first`)
+    }
+    paths[Path.posix.join(pkg.name, key)] = [declaration]
+  }
 }
-
-const pkg = JSON.parse(Fs.readFileSync(Path.join(pkgDir, "package.json"), "utf8"))
-const entrypoints = Object.entries(pkg.publishConfig.exports)
-  .filter(([key, target]) => target !== null && key !== "./package.json" && !key.includes("*"))
-  .map(([key]) => Path.posix.join(pkg.name, key))
-
-const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), "jose-dist-types-"))
+const entrypoints = Object.keys(paths)
+const dir = Fs.mkdtempSync(Path.join(Os.tmpdir(), "effect-auth-dist-types-"))
 try {
   Fs.writeFileSync(
     Path.join(dir, "index.ts"),
@@ -40,10 +44,7 @@ try {
         skipLibCheck: false,
         types: ["node"],
         typeRoots: [Path.join(root, "node_modules", "@types")],
-        paths: {
-          [pkg.name]: [Path.join(dist, "index.d.ts")],
-          [`${pkg.name}/*`]: [Path.join(dist, "*")]
-        }
+        paths
       },
       files: ["index.ts"]
     })

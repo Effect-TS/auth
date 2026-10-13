@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/@effect/docgen/schema.json",
+  "exclude": [
+    "src/internal/**/*.ts"
+  ],
+  "outDir": "docs",
+  "parseCompilerOptions": "../../tsconfig.base.json",
+  "examplesCompilerOptions": {
+    "allowImportingTsExtensions": true,
+    "lib": [
+      "ES2022",
+      "DOM",
+      "ESNext.Disposable"
+    ]
+  }
+}

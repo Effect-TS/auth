@@ -76,11 +76,15 @@ pnpm build
 
 BASE_COMMIT="$(git rev-parse "$BASE_REF")"
 
-if ! git cat-file -e "$BASE_COMMIT:packages/jose/package.json" 2>/dev/null; then
-  echo "No JOSE package exists at $BASE_REF; reporting current sizes only."
-  node packages/tools/bundle/src/bin.ts report "${FILES[@]}"
-  exit 0
-fi
+# A copied fixture can import any current package. An older workspace that
+# lacks one cannot resolve the same graph, so report current sizes explicitly.
+for PACKAGE_JSON in packages/*/package.json; do
+  if ! git cat-file -e "$BASE_COMMIT:$PACKAGE_JSON" 2>/dev/null; then
+    echo "$PACKAGE_JSON is absent at $BASE_REF; reporting current sizes only."
+    node packages/tools/bundle/src/bin.ts report "${FILES[@]}"
+    exit 0
+  fi
+done
 
 if [ -d "$BASE_DIR/packages/jose/dist" ] &&
   [ -f "$BASE_STAMP" ] &&
