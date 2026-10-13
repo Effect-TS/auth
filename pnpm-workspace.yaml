@@ -1,0 +1,9 @@
+packages:
+  - packages/*
+
+verifyDepsBeforeRun: error
+enableGlobalVirtualStore: false
+
+allowBuilds:
+  dprint: false
+  esbuild: false

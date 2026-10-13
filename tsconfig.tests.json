@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.base.json",
+  "references": [
+    {
+      "path": "packages/jose"
+    }
+  ],
+  "include": [
+    "vitest*.ts",
+    "packages/*/test/**/*.ts",
+    "packages/*/typetest/**/*.ts"
+  ],
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": true,
+    "types": [
+      "node"
+    ]
+  }
+}
