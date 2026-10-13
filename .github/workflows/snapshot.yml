@@ -3,7 +3,7 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    branches: [main, feat/jose-effect-port]
   workflow_dispatch:
 
 concurrency:
@@ -46,4 +46,4 @@ jobs:
         run: pnpm build
       - name: Create snapshot
         id: snapshot
-        run: pnpm exec pkg-pr-new publish --pnpm --comment=off ./packages/jose
+        run: pnpm exec pkg-pr-new publish --pnpm --comment=off ./packages/jose ./packages/crypto ./packages/oauth

@@ -10,6 +10,12 @@
       "path": "packages/jose"
     },
     {
+      "path": "packages/crypto"
+    },
+    {
+      "path": "packages/oauth"
+    },
+    {
       "path": "packages/tools/oxc"
     },
     {

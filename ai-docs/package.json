@@ -5,7 +5,9 @@
   "version": "0.0.0",
   "dependencies": {
     "@effect/platform-node": "4.0.3",
+    "@yielded/crypto": "workspace:*",
     "@yielded/jose": "workspace:*",
+    "@yielded/oauth": "workspace:*",
     "effect": "4.0.3"
   }
 }

@@ -53,7 +53,8 @@
     "build": "tsc -b tsconfig.json && pnpm babel",
     "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
     "check": "tsc -b tsconfig.json",
-    "codegen": "effect-utils codegen"
+    "codegen": "effect-utils codegen",
+    "docs": "docgen"
   },
   "devDependencies": {
     "effect": "4.0.3"

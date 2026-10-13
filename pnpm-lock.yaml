@@ -68,9 +68,15 @@ importers:
       '@vitest/coverage-v8':
         specifier: ^5.0.3
         version: 5.0.3(vitest@5.0.3)
+      '@yielded/crypto':
+        specifier: workspace:^
+        version: link:packages/crypto
       '@yielded/jose':
         specifier: workspace:^
         version: link:packages/jose
+      '@yielded/oauth':
+        specifier: workspace:^
+        version: link:packages/oauth
       ast-types:
         specifier: ^0.16.3
         version: 0.16.3
@@ -122,14 +128,36 @@ importers:
       '@effect/platform-node':
         specifier: 4.0.3
         version: 4.0.3(effect@4.0.3)(redis@6.3.0)
+      '@yielded/crypto':
+        specifier: workspace:*
+        version: link:../packages/crypto
       '@yielded/jose':
         specifier: workspace:*
         version: link:../packages/jose
+      '@yielded/oauth':
+        specifier: workspace:*
+        version: link:../packages/oauth
+      effect:
+        specifier: 4.0.3
+        version: 4.0.3
+
+  packages/crypto:
+    devDependencies:
       effect:
         specifier: 4.0.3
         version: 4.0.3
 
   packages/jose:
+    devDependencies:
+      effect:
+        specifier: 4.0.3
+        version: 4.0.3
+
+  packages/oauth:
+    dependencies:
+      '@yielded/jose':
+        specifier: workspace:^
+        version: link:../jose
     devDependencies:
       effect:
         specifier: 4.0.3

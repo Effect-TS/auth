@@ -25,7 +25,7 @@ BASE_COMMIT="$(git rev-parse "$BASE_REF")"
 if ! git cat-file -e "$BASE_COMMIT:packages/jose/package.json" 2>/dev/null ||
   ! git cat-file -e "$BASE_COMMIT:packages/tools/bundle/fixtures" 2>/dev/null; then
   mkdir -p "$(dirname "$OUTPUT_PATH")"
-  echo "No JOSE bundle baseline exists at $BASE_REF; reporting current sizes only."
+  echo "No package bundle baseline exists at $BASE_REF; reporting current sizes only."
   node packages/tools/bundle/src/bin.ts report packages/tools/bundle/fixtures/*.ts > "$OUTPUT_PATH"
   cat "$OUTPUT_PATH"
   exit 0

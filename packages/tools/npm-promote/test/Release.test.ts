@@ -42,12 +42,16 @@ const services = (options: {
   )
 
 describe("Release", () => {
-  it.effect("promotes the single JOSE package and resolves its tracking issue", () =>
+  it.effect("promotes the public packages and resolves the release tracking issue", () =>
     Effect.gen(function*() {
       const distTagCalls: Array<string> = []
       let resolved = false
       const provide = services({
-        registry: { "@yielded/jose": { latest: "0.1.0", versions: ["0.1.0", "0.1.1"] } },
+        registry: {
+          "@yielded/jose": { latest: "0.1.0", versions: ["0.1.0", "0.1.1"] },
+          "@yielded/crypto": { latest: "0.1.0", versions: ["0.1.0", "0.1.1"] },
+          "@yielded/oauth": { latest: "0.1.0", versions: ["0.1.0", "0.1.1"] }
+        },
         addDistTag: ({ name, tag, version }) => Effect.sync(() => distTagCalls.push(`${name}@${version} ${tag}`)),
         alerts: [],
         resolveAlert: Effect.sync(() => {
@@ -56,11 +60,19 @@ describe("Release", () => {
       })
 
       yield* provide(promoteRelease({
-        packages: [{ name: "@yielded/jose", version: "0.1.1" }],
+        packages: [
+          { name: "@yielded/crypto", version: "0.1.1" },
+          { name: "@yielded/jose", version: "0.1.1" },
+          { name: "@yielded/oauth", version: "0.1.1" }
+        ],
         bump: release.bump
       }, { overdueAfterHours: 12 }))
 
-      assert.deepStrictEqual(distTagCalls, ["@yielded/jose@0.1.1 latest"])
+      assert.deepStrictEqual(distTagCalls, [
+        "@yielded/jose@0.1.1 latest",
+        "@yielded/crypto@0.1.1 latest",
+        "@yielded/oauth@0.1.1 latest"
+      ])
       assert.isTrue(resolved)
     }))
 

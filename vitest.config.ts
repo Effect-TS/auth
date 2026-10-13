@@ -79,6 +79,8 @@ export default defineConfig({
     passWithNoTests: true,
     projects: [
       ...project("@yielded/jose", "packages/jose"),
+      ...project("@yielded/crypto", "packages/crypto"),
+      ...project("@yielded/oauth", "packages/oauth"),
       ...project("@effect/api-diff", "packages/tools/api-diff"),
       ...project("@effect/bundle", "packages/tools/bundle", true, {}, [
         ...exclude.filter((pattern) => pattern !== "**/bundle/**"),

@@ -1,8 +1,16 @@
 # Effect Auth
 
-Authentication packages for Effect. The workspace currently contains
-[`@yielded/jose`](packages/jose), ported from Yielded Auth with its module exports,
-schemas, token formats, and tagged errors preserved.
+Authentication building blocks for Effect, ported from Yielded Auth with their
+public modules, schemas, wire formats, and tagged errors preserved:
+
+- [`@yielded/jose`](packages/jose): schema-based JWTs, JWS, JWE, and JWKS.
+- [`@yielded/oauth`](packages/oauth): OAuth, signed OpenID Connect, and S256 PKCE.
+- [`@yielded/crypto`](packages/crypto): HMAC, AEAD, signatures, and bounded password
+  derivation with explicit native, portable, and Workers backends.
+
+OAuth uses JOSE and Effect's `Crypto` service. The crypto package supplies the
+operations beyond Effect's entropy and digest APIs; applications select its
+backend explicitly. The core `@yielded/auth` package is not part of this port yet.
 
 Development follows
 [Effect at 74d19304](https://github.com/Effect-TS/effect/tree/74d19304da077d98cc6dcb294c71e253365f272f):
@@ -37,7 +45,7 @@ check reports current sizes without a comparison.
 CI uses Effect's pinned actions, Node 26.4.0, Bun 1.4.0, Deno 2.9.4, Namespace
 runner profiles, and separate static, types, build, bundle, runtime, and doctest
 jobs. Run `bun run --bun vitest run`, `deno task test --run`, and `deno check .`
-to exercise the additional runtimes locally. JOSE and the vendored tooling tests
+to exercise the additional runtimes locally. Public packages and the vendored tooling tests
 use the same runtime selection as Effect; only `@effect/utils` requires Node.
 
 Release, snapshot, release queue, bundle comment, and npm promotion workflows
@@ -49,7 +57,8 @@ the `staging` npm tag before promotion; prereleases are never promoted to `lates
 Repository administration must provide the same external integrations:
 Namespace profiles `linux-small` and `linux-default`, protected `fork` and
 `npm-promote` environments, `CHANGESET_GITHUB_TOKEN` and `EFFECT_BOT_GH`, and the
-pkg-pr-new GitHub app. Configure npm trusted publishers for `@yielded/jose` in
+pkg-pr-new GitHub app. Configure npm trusted publishers for `@yielded/jose`,
+`@yielded/oauth`, and `@yielded/crypto` in
 `Effect-TS/auth`: `release.yml` for publication and `npm-promote.yml` with the
 `npm-promote` environment for dist-tag updates. See the
 [promotion tool](packages/tools/npm-promote/README.md) for details.
