@@ -1,7 +1,10 @@
 # Third-party notices
 
-The TypeScript, Oxlint, and dprint configuration is adapted from
-[Effect](https://github.com/Effect-TS/effect), under the license below.
+The tooling packages, development scripts, configuration, and GitHub workflows
+are copied or adapted from
+[Effect commit 74d19304da077d98cc6dcb294c71e253365f272f](https://github.com/Effect-TS/effect/tree/74d19304da077d98cc6dcb294c71e253365f272f),
+under the license below. See [tooling provenance](packages/tools/UPSTREAM.md)
+for repository-specific adaptations.
 
 JOSE source and test attributions are in
 [the package notices](packages/jose/THIRD_PARTY_NOTICES.md).

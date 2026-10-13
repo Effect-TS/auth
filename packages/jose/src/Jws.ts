@@ -1,3 +1,9 @@
+/**
+ * Compact JSON Web Signatures with explicit algorithm allowlists and algorithm-bound verification keys.
+ *
+ * @stability unstable
+ * @since 0.1.0
+ */
 import * as Effect from "effect/Effect"
 import * as Base64Url from "effect/encoding/Base64Url"
 import * as Redacted from "effect/Redacted"
@@ -19,6 +25,13 @@ import {
 } from "./Jwk.ts"
 import { Jwks } from "./Jwks.ts"
 
+/**
+ * Schema for a supported protected JWS header and optional key and content identifiers.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const Header = Schema.Struct({
   alg: Algorithm,
   kid: Schema.optionalKey(Schema.String.check(Schema.isMaxLength(256))),
@@ -26,19 +39,54 @@ export const Header = Schema.Struct({
   cty: Schema.optionalKey(Schema.NonEmptyString)
 })
 
+/**
+ * Value described by the Header schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type Header = typeof Header.Type
 
+/**
+ * Schema requiring an explicit, non-empty allowlist of acceptable signature algorithms.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const VerifyOptions = Schema.Struct({
   algorithms: Schema.Array(Algorithm).check(Schema.isMinLength(1))
 })
 
+/**
+ * Schema requiring an explicit, non-empty allowlist of acceptable signature algorithms.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type VerifyOptions = typeof VerifyOptions.Type
 
+/**
+ * Authenticated protected header and redacted payload bytes returned after signature verification.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface Verified {
   readonly protectedHeader: Header
   readonly payload: Redacted.Redacted<Uint8Array>
 }
 
+/**
+ * Service requirements for JWS operations, which use the runtime Web Crypto implementation.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type Requirements = never
 
 const readHeader = Effect.fnUntraced(function*(input: unknown) {
@@ -99,6 +147,13 @@ const verifyAsymmetric = Effect.fnUntraced(function*(
   } satisfies Verified
 })
 
+/**
+ * Signs redacted payload bytes as a compact JWS using an algorithm-bound key.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const sign = Effect.fnUntraced(function*(
   payload: Redacted.Redacted<Uint8Array>,
   key: SigningKey,
@@ -144,6 +199,32 @@ export const sign = Effect.fnUntraced(function*(
   return Redacted.make(`${signingInput}.${Base64Url.encode(signature)}`)
 })
 
+/**
+ * Authenticates a compact JWS with an explicit key and algorithm allowlist.
+ *
+ * **Example** (Authenticating signed payload bytes)
+ *
+ * ```ts import.meta.vitest
+ * import { Jwk, Jws } from "@yielded/jose"
+ * import { Effect, Redacted } from "effect"
+ *
+ * const payload = await Effect.runPromise(Effect.gen(function*() {
+ *   // Fixed public example material; generate application secrets securely.
+ *   const key = yield* Jwk.importSecret(
+ *     Redacted.make({ kty: "oct", k: "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc" }),
+ *     "HS256"
+ *   )
+ *   const token = yield* Jws.sign(Redacted.make(new TextEncoder().encode("hello")), key, { alg: "HS256" })
+ *   const verified = yield* Jws.verify(token, key, { algorithms: ["HS256"] })
+ *   return new TextDecoder().decode(Redacted.value(verified.payload))
+ * }))
+ * payload // => "hello"
+ * ```
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const verify = Effect.fnUntraced(function*(
   token: Redacted.Redacted<string>,
   key: VerificationKey,
@@ -173,6 +254,13 @@ export const verify = Effect.fnUntraced(function*(
   } satisfies Verified
 })
 
+/**
+ * Resolves an asymmetric verification key from the Jwks service and authenticates the compact JWS.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const verifyWithKeySet = Effect.fnUntraced(function*(
   token: Redacted.Redacted<string>,
   options: VerifyOptions

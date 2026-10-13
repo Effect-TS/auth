@@ -1,11 +1,22 @@
 {
   "$schema": "https://unpkg.com/@changesets/config@4.0.0-next.8/schema.json",
-  "changelog": "@changesets/cli/changelog",
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "Effect-TS/auth"
+    }
+  ],
   "commit": false,
-  "fixed": [],
+  "format": false,
   "linked": [],
-  "access": "public",
+  "access": "restricted",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [],
+  "privatePackages": false,
+  "fixed": [],
+  "snapshot": {
+    "useCalculatedVersion": false,
+    "prereleaseTemplate": "{tag}-{commit}"
+  }
 }

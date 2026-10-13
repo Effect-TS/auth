@@ -1,3 +1,9 @@
+/**
+ * Local and scoped remote public-key resolvers with explicit selection policy and bounded HTTPS retrieval.
+ *
+ * @stability unstable
+ * @since 0.1.0
+ */
 import * as Clock from "effect/Clock"
 import * as Context from "effect/Context"
 import * as Deferred from "effect/Deferred"
@@ -18,19 +24,54 @@ import { json } from "./internal/encoding.ts"
 import * as KeyInput from "./internal/keyInput.ts"
 import { AsymmetricAlgorithm, importPublic, PublicJwk, type PublicKey } from "./Jwk.ts"
 
+/**
+ * Schema for a bounded collection of public JWKs.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const KeySet = Schema.Struct({
   keys: Schema.Array(PublicJwk).check(Schema.isMaxLength(KeyInput.maxArrayLength))
 })
 
+/**
+ * Value described by the KeySet schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type KeySet = typeof KeySet.Type
 
+/**
+ * Schema for an asymmetric algorithm and optional key identifier used to select a public key.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const Selection = Schema.Struct({
   algorithm: AsymmetricAlgorithm,
   kid: Schema.optionalKey(Schema.String.check(Schema.isMaxLength(256)))
 })
 
+/**
+ * Value described by the Selection schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type Selection = typeof Selection.Type
 
+/**
+ * Service that resolves a unique public verification key according to an explicit selection policy.
+ *
+ * @stability unstable
+ * @category services
+ * @since 0.1.0
+ */
 export class Jwks extends Context.Service<
   Jwks,
   {
@@ -38,9 +79,32 @@ export class Jwks extends Context.Service<
   }
 >()("@yielded/jose/Jwks") {}
 
-/** Capture one detached immutable key-set generation without acquiring resources.
- * Retain the resolver for that generation; create a new one when keys change.
- * Each resolution applies the caller's selection policy. */
+/**
+ * Captures a detached, immutable key-set generation and returns its resource-free public-key resolver.
+ *
+ * **Details**
+ *
+ * Retain the resolver for that generation; create a new one when keys change. Each resolution applies the caller's selection policy.
+ *
+ * **Example** (Resolving one trusted public key)
+ *
+ * ```ts import.meta.vitest
+ * import { Jwk, Jwks } from "@yielded/jose"
+ * import { Effect } from "effect"
+ *
+ * const algorithm = await Effect.runPromise(Effect.gen(function*() {
+ *   const pair = yield* Jwk.generateKeyPair({ algorithm: "ES256", kid: "signing-1" })
+ *   const resolver = yield* Jwks.makeLocal({ keys: [pair.publicKey] })
+ *   const key = yield* resolver.resolve({ algorithm: "ES256", kid: "signing-1" })
+ *   return key.algorithm
+ * }))
+ * algorithm // => "ES256"
+ * ```
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const makeLocal = Effect.fnUntraced(function*(input: unknown) {
   const set = yield* readSet(input)
   const importKey = makePublicImporter()
@@ -54,9 +118,22 @@ export const makeLocal = Effect.fnUntraced(function*(input: unknown) {
   })
 })
 
-/** One immutable public key set; local selection never requires HttpClient. */
+/**
+ * Provides a resolver for one immutable public key set without requiring an HTTP client.
+ *
+ * @stability unstable
+ * @category layers
+ * @since 0.1.0
+ */
 export const layerLocal = (input: unknown): Layer.Layer<Jwks, InvalidKey> => Layer.effect(Jwks, makeLocal(input))
 
+/**
+ * Trusted HTTPS endpoint configuration and bounds for caching, requests, responses, and waiting callers.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface RemoteOptions {
   /** Trusted application configuration, never a URL from a token. HTTPS only. */
   readonly url: string
@@ -184,12 +261,15 @@ type Admission =
   }
 
 /**
- * One trusted HTTPS endpoint per Layer. The supplied client owns egress policy
- * and must not follow redirects; FetchHttpClient is configured to reject them.
- * Responses from another URL are rejected with every client. No stale-on-error
- * fallback, global cache, background polling, or token-supplied key URLs.
+ * Provides a scoped resolver for one trusted HTTPS key-set endpoint using the supplied HTTP client.
+ *
+ * **Details**
+ *
+ * The supplied client owns egress policy and must not follow redirects. FetchHttpClient is configured to reject redirects; responses from another URL are rejected for every client. There is no stale-on-error fallback, global cache, background polling, or token-supplied key URL.
  *
  * @stability unstable
+ * @category layers
+ * @since 0.1.0
  */
 export const layerRemote = (
   input: RemoteOptions

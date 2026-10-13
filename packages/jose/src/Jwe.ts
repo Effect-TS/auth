@@ -1,3 +1,9 @@
+/**
+ * Compact direct A256GCM encryption with authenticated protected headers and redacted plaintext.
+ *
+ * @stability unstable
+ * @since 0.1.0
+ */
 import * as Crypto from "effect/Crypto"
 import * as Effect from "effect/Effect"
 import * as Base64Url from "effect/encoding/Base64Url"
@@ -11,6 +17,13 @@ import { decode, json, JsonObject, parse, reveal, split, stringify, utf8 } from 
 import * as KeyPolicy from "./internal/keyPolicy.ts"
 import type { SecretKey } from "./Jwk.ts"
 
+/**
+ * Schema for direct symmetric encryption with A256GCM and optional key and content identifiers.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const Header = Schema.Struct({
   alg: Schema.Literal("dir"),
   enc: Schema.Literal("A256GCM"),
@@ -19,7 +32,21 @@ export const Header = Schema.Struct({
   cty: Schema.optionalKey(Schema.NonEmptyString)
 })
 
+/**
+ * Value described by the Header schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type Header = typeof Header.Type
+/**
+ * Failures produced by compact encryption, decryption, key validation, or cryptographic operations.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type JweError = InvalidToken | InvalidKey | OperationError | DecryptionFailed
 
 const readHeader = Effect.fnUntraced(function*(input: unknown) {
@@ -33,9 +60,37 @@ const readHeader = Effect.fnUntraced(function*(input: unknown) {
 })
 
 /**
- * Generates a fresh 96-bit IV; random-source failures become CryptoUnavailable.
+ * Encrypts redacted plaintext as a compact JWE with a fresh 96-bit IV from the Crypto service.
+ *
+ * **Details**
+ *
+ * Random-source failures become typed CryptoUnavailable errors without exposing native causes.
+ *
+ * **Example** (Encrypting and authenticating plaintext)
+ *
+ * ```ts import.meta.vitest
+ * import { NodeCrypto } from "@effect/platform-node"
+ * import { Jwe, Jwk } from "@yielded/jose"
+ * import { Effect, Redacted } from "effect"
+ *
+ * const plaintext = await Effect.runPromise(Effect.gen(function*() {
+ *   // Fixed public example material; generate application secrets securely.
+ *   const key = yield* Jwk.importSecret(
+ *     Redacted.make({ kty: "oct", k: "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc" }),
+ *     "dir"
+ *   )
+ *   const token = yield* Jwe.encrypt(
+ *     Redacted.make(new TextEncoder().encode("private message")), key, { alg: "dir", enc: "A256GCM" }
+ *   )
+ *   const decrypted = yield* Jwe.decrypt(token, key)
+ *   return new TextDecoder().decode(Redacted.value(decrypted.plaintext))
+ * }).pipe(Effect.provide(NodeCrypto.layer)))
+ * plaintext // => "private message"
+ * ```
  *
  * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
  */
 export const encrypt = Effect.fnUntraced(function*(
   plaintext: Redacted.Redacted<Uint8Array>,
@@ -78,6 +133,13 @@ export const encrypt = Effect.fnUntraced(function*(
   )
 })
 
+/**
+ * Authenticates and decrypts a compact direct A256GCM JWE, returning redacted plaintext and its protected header.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const decrypt = Effect.fnUntraced(function*(
   token: Redacted.Redacted<string>,
   key: SecretKey

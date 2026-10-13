@@ -18,7 +18,10 @@
     "dist/**/*.js.map",
     "dist/**/*.d.ts",
     "dist/**/*.d.ts.map",
-    "THIRD_PARTY_NOTICES.md"
+    "THIRD_PARTY_NOTICES.md",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "ai-docs/**/*"
   ],
   "type": "module",
   "sideEffects": [],
@@ -49,7 +52,8 @@
   "scripts": {
     "build": "tsc -b tsconfig.json && pnpm babel",
     "babel": "babel dist --plugins annotate-pure-calls --out-dir dist --source-maps",
-    "check": "tsc -b tsconfig.json"
+    "check": "tsc -b tsconfig.json",
+    "codegen": "effect-utils codegen"
   },
   "devDependencies": {
     "effect": "4.0.3"

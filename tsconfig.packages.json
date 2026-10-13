@@ -1,8 +1,37 @@
 {
-  "files": [],
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "./tsconfig.base.json",
+  "include": [],
   "references": [
     {
+      "path": "ai-docs"
+    },
+    {
       "path": "packages/jose"
+    },
+    {
+      "path": "packages/tools/oxc"
+    },
+    {
+      "path": "packages/tools/jsdocs"
+    },
+    {
+      "path": "packages/tools/doctest"
+    },
+    {
+      "path": "packages/tools/bundle"
+    },
+    {
+      "path": "packages/tools/ai-docgen"
+    },
+    {
+      "path": "packages/tools/utils"
+    },
+    {
+      "path": "packages/tools/docgen"
+    },
+    {
+      "path": "packages/tools/npm-promote"
     }
   ]
 }

@@ -1,3 +1,9 @@
+/**
+ * Schema-based compact JSON Web Tokens with signature authentication and registered-claim validation.
+ *
+ * @stability unstable
+ * @since 0.1.0
+ */
 import * as Clock from "effect/Clock"
 import * as Effect from "effect/Effect"
 import * as Redacted from "effect/Redacted"
@@ -10,6 +16,13 @@ import type { Jwks } from "./Jwks.ts"
 import { type Header, type Requirements, VerifyOptions as JwsVerifyOptions } from "./Jws.ts"
 import * as Jws from "./Jws.ts"
 
+/**
+ * Schema for standard JWT claims, allowing a string or string array audience and finite NumericDate values.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const RegisteredClaims = Schema.Struct({
   iss: Schema.optionalKey(Schema.String),
   sub: Schema.optionalKey(Schema.String),
@@ -20,6 +33,13 @@ export const RegisteredClaims = Schema.Struct({
   jti: Schema.optionalKey(Schema.String)
 })
 
+/**
+ * Value described by the RegisteredClaims schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type RegisteredClaims = typeof RegisteredClaims.Type
 
 const expected = Schema.Union([
@@ -29,6 +49,13 @@ const expected = Schema.Union([
 
 const seconds = Schema.Finite.check(Schema.isGreaterThanOrEqualTo(0))
 
+/**
+ * Schema for signature policy, expected claims, required claims, clock tolerance, and maximum token age.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const VerifyOptions = Schema.Struct({
   ...JwsVerifyOptions.fields,
   issuer: Schema.optionalKey(expected),
@@ -42,14 +69,35 @@ export const VerifyOptions = Schema.Struct({
   )
 })
 
+/**
+ * Value described by the VerifyOptions schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type VerifyOptions = typeof VerifyOptions.Type
 
+/**
+ * Decoded application claims, validated registered claims, and the authenticated protected header.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface Verified<A> {
   readonly claims: A
   readonly registeredClaims: RegisteredClaims
   readonly protectedHeader: Header
 }
 
+/**
+ * Failures produced by JWT key handling, signature verification, claim validation, or schema conversion.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type JwtError = VerifyError | ClaimValidationFailed | Schema.SchemaError
 
 const checkClaims = Effect.fnUntraced(function*(
@@ -148,6 +196,13 @@ const decodeClaims = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   >
 })
 
+/**
+ * Encodes application claims with a schema and signs their JSON object representation as a compact JWT.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const sign = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   schema: S,
   claims: S["Type"],
@@ -162,6 +217,35 @@ export const sign = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   return yield* Jws.sign(Redacted.make(utf8(yield* stringify(wire))), key, header)
 })
 
+/**
+ * Authenticates a compact JWT, validates registered claims against the clock and policy, and decodes application claims.
+ *
+ * **Example** (Verifying application claims and issuer policy)
+ *
+ * ```ts import.meta.vitest
+ * import { Jwk, Jwt } from "@yielded/jose"
+ * import { Effect, Redacted, Schema } from "effect"
+ *
+ * const Claims = Schema.Struct({ sub: Schema.String, iss: Schema.String })
+ * const claims = await Effect.runPromise(Effect.gen(function*() {
+ *   // Fixed public example material; generate application secrets securely.
+ *   const key = yield* Jwk.importSecret(
+ *     Redacted.make({ kty: "oct", k: "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc" }),
+ *     "HS256"
+ *   )
+ *   const token = yield* Jwt.sign(Claims, { sub: "user-123", iss: "example" }, key, { alg: "HS256" })
+ *   const verified = yield* Jwt.verify(Claims, token, key, {
+ *     algorithms: ["HS256"], issuer: "example", requiredClaims: ["sub", "iss"]
+ *   })
+ *   return verified.claims
+ * }))
+ * claims // => ({ sub: "user-123", iss: "example" })
+ * ```
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const verify = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   schema: S,
   token: Redacted.Redacted<string>,
@@ -174,6 +258,13 @@ export const verify = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   return yield* decodeClaims(schema, yield* Jws.verify(token, key, policy), policy)
 })
 
+/**
+ * Authenticates and decodes a JWT using an asymmetric key resolved from the Jwks service.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const verifyWithKeySet = Effect.fnUntraced(function*<S extends Schema.Constraint>(
   schema: S,
   token: Redacted.Redacted<string>,
@@ -189,7 +280,13 @@ export const verifyWithKeySet = Effect.fnUntraced(function*<S extends Schema.Con
   return { ...(yield* decodeClaims(schema, jws, policy)), key: jws.key }
 })
 
-/** Parsing only. This result does not establish authenticity or validate claims. */
+/**
+ * Parses claims without establishing authenticity, validating registered claims, or decoding application claims.
+ *
+ * @stability unstable
+ * @category cryptography
+ * @since 0.1.0
+ */
 export const decodeUnverified = Effect.fnUntraced(function*(token: Redacted.Redacted<string>) {
   const [, payload] = yield* split(token, 3)
   const claims = yield* json(yield* decode(payload), "payload")

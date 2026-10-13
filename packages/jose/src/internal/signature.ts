@@ -2,7 +2,7 @@ import * as Effect from "effect/Effect"
 import * as Base64Url from "effect/encoding/Base64Url"
 import * as Redacted from "effect/Redacted"
 import * as Schema from "effect/Schema"
-import { copy, decode, importError, nativeError, withSecret } from "./crypto.ts"
+import { copy, decode, importError, nativeError, nativeErrorName, withSecret } from "./crypto.ts"
 import { CryptoUnavailable, InvalidInput } from "./cryptoErrors.ts"
 import {
   type Algorithm,
@@ -203,6 +203,10 @@ export const generateKeyPair = Effect.fnUntraced(function*(input: GenerateKeyPai
     catch: nativeError
   })
 
+  if (!("privateKey" in pair)) {
+    return yield* CryptoUnavailable.make({})
+  }
+
   const jwk = yield* Effect.tryPromise({
     try: () => globalThis.crypto.subtle.exportKey("jwk", pair.privateKey),
     catch: nativeError
@@ -218,7 +222,11 @@ export const encodePublicKey = Effect.fnUntraced(function*(input: PublicKeyParam
 
   const encoded = yield* Effect.tryPromise({
     try: () => globalThis.crypto.subtle.exportKey("spki", key),
-    catch: nativeError
+    // Deno defers rejecting an invalid EC point until SPKI export.
+    catch: (cause) =>
+      nativeErrorName(cause) === "OperationError"
+        ? InvalidInput.make({ reason: "key" })
+        : nativeError(cause)
   })
 
   return new Uint8Array(encoded)

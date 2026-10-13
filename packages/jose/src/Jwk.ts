@@ -1,3 +1,9 @@
+/**
+ * Schemas, generation, import, and export for algorithm-bound JOSE keys. Private and symmetric material remains redacted.
+ *
+ * @stability unstable
+ * @since 0.1.0
+ */
 import * as Effect from "effect/Effect"
 import * as Base64Url from "effect/encoding/Base64Url"
 import * as Redacted from "effect/Redacted"
@@ -10,9 +16,37 @@ import { algorithms } from "./internal/algorithms.ts"
 import { decode, reveal } from "./internal/encoding.ts"
 import * as KeyInput from "./internal/keyInput.ts"
 
+/**
+ * Schema for the supported asymmetric signing algorithms: RS256, PS256, ES256, and EdDSA.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const AsymmetricAlgorithm = Schema.Literals(["RS256", "PS256", "ES256", "EdDSA"])
+/**
+ * Value described by the AsymmetricAlgorithm schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type AsymmetricAlgorithm = typeof AsymmetricAlgorithm.Type
+/**
+ * Schema for the supported JWS algorithms, including HS256.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const Algorithm = Schema.Literals(["HS256", "RS256", "PS256", "ES256", "EdDSA"])
+/**
+ * Value described by the Algorithm schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type Algorithm = typeof Algorithm.Type
 
 const encodedBytes = Schema.String.check(
@@ -53,14 +87,35 @@ const okp = {
 
 const noSecret = { d: Schema.optionalKey(Schema.Never), k: Schema.optionalKey(Schema.Never) }
 
+/**
+ * Schema for RSA, P-256, and Ed25519 public JWKs, rejecting private and symmetric key material.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const PublicJwk = Schema.Union([
   Schema.Struct({ ...rsa, ...noSecret }),
   Schema.Struct({ ...ec, ...noSecret }),
   Schema.Struct({ ...okp, ...noSecret })
 ])
 
+/**
+ * Value described by the PublicJwk schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type PublicJwk = typeof PublicJwk.Type
 
+/**
+ * Schema for RSA, P-256, and Ed25519 private JWKs.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const PrivateJwk = Schema.Union([
   Schema.Struct({
     ...rsa,
@@ -76,16 +131,44 @@ export const PrivateJwk = Schema.Union([
   Schema.Struct({ ...okp, d: encodedBytes })
 ])
 
+/**
+ * Value described by the PrivateJwk schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type PrivateJwk = typeof PrivateJwk.Type
 
+/**
+ * Schema for an octet-sequence JWK with optional key-use metadata.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const SecretJwk = Schema.Struct({
   ...metadata,
   kty: Schema.Literal("oct"),
   k: encodedBytes
 })
 
+/**
+ * Value described by the SecretJwk schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type SecretJwk = typeof SecretJwk.Type
 
+/**
+ * Schema for asymmetric key generation options and an optional key identifier.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const GenerateKeyPairInput = Schema.Union([
   Schema.Struct({
     algorithm: Schema.Literals(["RS256", "PS256"]),
@@ -95,16 +178,43 @@ export const GenerateKeyPairInput = Schema.Union([
   Schema.Struct({ algorithm: Schema.Literals(["ES256", "EdDSA"]), kid: metadata.kid })
 ])
 
+/**
+ * Value described by the GenerateKeyPairInput schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type GenerateKeyPairInput = typeof GenerateKeyPairInput.Type
 
+/**
+ * Schema for a generated public JWK and its redacted private JWK.
+ *
+ * @stability unstable
+ * @category schemas
+ * @since 0.1.0
+ */
 export const GeneratedKeyPair = Schema.Struct({
   publicKey: PublicJwk,
   privateKey: Schema.Redacted(PrivateJwk, { disallowJsonEncode: true })
 })
 
+/**
+ * Value described by the GeneratedKeyPair schema.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type GeneratedKeyPair = typeof GeneratedKeyPair.Type
 
-/** Validated, algorithm-bound key snapshots. Private material remains Redacted. */
+/**
+ * Validated, algorithm-bound public key snapshot and encoded verification material.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface PublicKey {
   readonly _tag: "PublicKey"
   readonly algorithm: AsymmetricAlgorithm
@@ -112,6 +222,13 @@ export interface PublicKey {
   readonly material: Uint8Array
 }
 
+/**
+ * Validated, algorithm-bound private key snapshot with redacted JWK and signing material.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface PrivateKey {
   readonly _tag: "PrivateKey"
   readonly algorithm: AsymmetricAlgorithm
@@ -119,6 +236,13 @@ export interface PrivateKey {
   readonly material: Redacted.Redacted<Uint8Array>
 }
 
+/**
+ * Validated symmetric key snapshot bound to HS256 signing or direct encryption.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export interface SecretKey {
   readonly _tag: "SecretKey"
   readonly algorithm: "HS256" | "dir"
@@ -126,10 +250,30 @@ export interface SecretKey {
   readonly material: Redacted.Redacted<Uint8Array>
 }
 
+/**
+ * Private or symmetric key accepted by JWS and JWT signing operations.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type SigningKey = PrivateKey | SecretKey
+/**
+ * Public or symmetric key accepted by JWS and JWT verification operations.
+ *
+ * @stability unstable
+ * @category models
+ * @since 0.1.0
+ */
 export type VerificationKey = PublicKey | SecretKey
 
-/** Generate typed signing JWKs through Web Crypto. */
+/**
+ * Generates asymmetric signing JWKs through Web Crypto, keeping private material redacted.
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const generateKeyPair = Effect.fnUntraced(function*(input: GenerateKeyPairInput) {
   const value = yield* Schema.decodeEffect(GenerateKeyPairInput)(input).pipe(
     Effect.mapError(() => InvalidKey.make({}))
@@ -254,6 +398,13 @@ const publicParameters = Effect.fnUntraced(function*(
   }
 })
 
+/**
+ * Validates and snapshots a public JWK for the explicitly selected asymmetric algorithm.
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const importPublic = Effect.fnUntraced(function*(
   input: unknown,
   selected: AsymmetricAlgorithm
@@ -274,6 +425,13 @@ export const importPublic = Effect.fnUntraced(function*(
   }) satisfies PublicKey
 })
 
+/**
+ * Validates and snapshots a redacted private JWK for the explicitly selected asymmetric algorithm.
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const importPrivate = Effect.fnUntraced(function*(
   input: Redacted.Redacted<unknown>,
   selected: AsymmetricAlgorithm
@@ -332,7 +490,13 @@ export const importPrivate = Effect.fnUntraced(function*(
   }) satisfies PrivateKey
 })
 
-/** Import PKCS8 DER through Web Crypto, then bind the resulting JWK. */
+/**
+ * Imports redacted PKCS8 DER through Web Crypto and binds the resulting private key to an algorithm.
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const importPkcs8 = Effect.fnUntraced(function*(
   input: Redacted.Redacted<Uint8Array>,
   selected: AsymmetricAlgorithm,
@@ -404,6 +568,26 @@ export const importPkcs8 = Effect.fnUntraced(function*(
   )
 })
 
+/**
+ * Imports a redacted octet JWK with at least 32 bytes for HS256 or exactly 32 bytes for direct encryption.
+ *
+ * **Example** (Binding a symmetric signing key)
+ *
+ * ```ts import.meta.vitest
+ * import { Jwk } from "@yielded/jose"
+ * import { Effect, Redacted } from "effect"
+ *
+ * // Fixed public example material; generate application secrets securely.
+ * const secret = Redacted.make({ kty: "oct", k: "BwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwcHBwc" })
+ * const key = await Effect.runPromise(Jwk.importSecret(secret, "HS256"))
+ * key.algorithm // => "HS256"
+ * key._tag // => "SecretKey"
+ * ```
+ *
+ * @stability unstable
+ * @category constructors
+ * @since 0.1.0
+ */
 export const importSecret = Effect.fnUntraced(function*(
   input: Redacted.Redacted<unknown>,
   selected: "HS256" | "dir"
@@ -435,10 +619,24 @@ export const importSecret = Effect.fnUntraced(function*(
   }) satisfies SecretKey
 })
 
+/**
+ * Returns a detached, validated public JWK from an imported key.
+ *
+ * @stability unstable
+ * @category encoding
+ * @since 0.1.0
+ */
 export const exportPublic = Effect.fnUntraced(function*(key: PublicKey) {
   return yield* read(PublicJwk, key.jwk)
 })
 
+/**
+ * Returns a detached private or symmetric JWK while preserving its redacted wrapper.
+ *
+ * @stability unstable
+ * @category encoding
+ * @since 0.1.0
+ */
 export const exportPrivate = Effect.fnUntraced(function*(key: PrivateKey | SecretKey) {
   const value = yield* reveal<PrivateJwk | SecretJwk>(key.jwk).pipe(
     Effect.mapError(() => InvalidKey.make({}))
